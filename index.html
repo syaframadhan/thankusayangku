@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -35,13 +35,8 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(
-    150deg,
-    #a9d2f5,
-    #739fd4,
-    #d1dff4
-  );
-  transition: opacity 1s, visibility 1s;
+  background: linear-gradient(150deg,#a9d2f5,#739fd4,#d1dff4);
+  transition: opacity .8s, visibility .8s;
 }
 
 #lockScreen.open {
@@ -51,8 +46,8 @@ canvas {
 }
 
 .lockBox {
-  width: min(320px, 88vw);
-  padding: 28px 22px;
+  width: min(320px,88vw);
+  padding: 24px 22px;
   text-align: center;
   border: 1px solid #ffffff88;
   border-radius: 28px;
@@ -63,30 +58,22 @@ canvas {
 
 #lockCanvas {
   width: 140px;
-  height: 155px;
+  height: 130px;
   margin: 0 auto 10px;
-}
-
-.lockBox h1 {
-  font-size: 19px;
-  font-weight: normal;
-  color: #fff;
-  letter-spacing: 3px;
-  margin-bottom: 20px;
 }
 
 #display {
   height: 38px;
   margin-bottom: 17px;
   color: white;
-  font: 24px Arial, sans-serif;
+  font: 24px Arial,sans-serif;
   letter-spacing: 12px;
   padding-left: 12px;
 }
 
 .keypad {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3,1fr);
   gap: 10px;
 }
 
@@ -98,7 +85,6 @@ canvas {
   color: white;
   font-size: 19px;
   cursor: pointer;
-  transition: background .2s, transform .2s;
 }
 
 .key:active {
@@ -122,7 +108,7 @@ canvas {
   min-height: 16px;
   margin-top: 12px;
   color: white;
-  font: 11px Arial, sans-serif;
+  font: 12px Arial,sans-serif;
 }
 
 #title {
@@ -133,13 +119,13 @@ canvas {
   width: 100%;
   text-align: center;
   color: white;
-  font-size: clamp(32px, 7vw, 52px);
+  font-size: clamp(32px,7vw,52px);
   font-weight: normal;
   letter-spacing: 3px;
-  text-shadow: 0 4px 30px #315b8a55;
+  text-shadow: 0 4px 30px #315b8a88;
   opacity: 0;
   transform: translateY(12px);
-  transition: opacity 2s, transform 2s;
+  transition: opacity 2s,transform 2s;
   pointer-events: none;
 }
 
@@ -165,7 +151,6 @@ canvas {
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 1s;
 }
 
 #music.show {
@@ -180,7 +165,7 @@ canvas {
   left: 0;
   width: 100%;
   text-align: center;
-  font: 11px Arial, sans-serif;
+  font: 11px Arial,sans-serif;
   letter-spacing: 2px;
   color: white;
   opacity: 0;
@@ -199,10 +184,7 @@ canvas {
 
 <section id="lockScreen">
   <div class="lockBox">
-
     <div id="lockCanvas"></div>
-
-    <h1>ENTER PASSCODE</h1>
 
     <div id="display">----</div>
 
@@ -210,30 +192,24 @@ canvas {
       <button class="key" data-number="1">1</button>
       <button class="key" data-number="2">2</button>
       <button class="key" data-number="3">3</button>
-
       <button class="key" data-number="4">4</button>
       <button class="key" data-number="5">5</button>
       <button class="key" data-number="6">6</button>
-
       <button class="key" data-number="7">7</button>
       <button class="key" data-number="8">8</button>
       <button class="key" data-number="9">9</button>
-
       <button class="key" data-action="clear">C</button>
       <button class="key" data-number="0">0</button>
       <button class="key" data-action="delete">⌫</button>
     </div>
 
     <button id="unlock">UNLOCK</button>
-
     <div id="message"></div>
-
   </div>
 </section>
 
 <div id="title">For You</div>
-
-<div id="loading">A LITTLE MOMENT...</div>
+<div id="loading">LOADING FLOWERS...</div>
 
 <button id="music">♫ PLAY DAYLIGHT</button>
 
@@ -241,426 +217,320 @@ canvas {
   <source src="./daylight.mp3" type="audio/mpeg">
 </audio>
 
+<!-- KEYPAD: sengaja dipisahkan dari Three.js -->
+<script>
+(() => {
+  let passcode = "";
+  let unlocked = false;
+
+  const display = document.querySelector("#display");
+  const message = document.querySelector("#message");
+  const lockScreen = document.querySelector("#lockScreen");
+  const title = document.querySelector("#title");
+  const musicButton = document.querySelector("#music");
+  const song = document.querySelector("#song");
+
+  function updateDisplay() {
+    display.textContent = passcode.padEnd(4, "-").split("").join(" ");
+  }
+
+  document.querySelectorAll("[data-number]").forEach(button => {
+    button.addEventListener("click", () => {
+      if (unlocked || passcode.length >= 4) return;
+
+      passcode += button.dataset.number;
+      updateDisplay();
+      message.textContent = "";
+    });
+  });
+
+  document.querySelector('[data-action="clear"]').addEventListener("click", () => {
+    if (unlocked) return;
+    passcode = "";
+    updateDisplay();
+    message.textContent = "";
+  });
+
+  document.querySelector('[data-action="delete"]').addEventListener("click", () => {
+    if (unlocked) return;
+    passcode = passcode.slice(0, -1);
+    updateDisplay();
+    message.textContent = "";
+  });
+
+  document.querySelector("#unlock").addEventListener("click", async () => {
+    if (unlocked) return;
+
+    if (passcode !== "2305") {
+      message.textContent = "KODE SALAH";
+      passcode = "";
+      updateDisplay();
+      return;
+    }
+
+    unlocked = true;
+    message.textContent = "";
+
+    lockScreen.classList.add("open");
+    title.classList.add("show");
+    musicButton.classList.add("show");
+
+    document.querySelector("#loading").classList.add("show");
+
+    // Beri tahu scene Three.js bahwa kunci sudah terbuka.
+    window.dispatchEvent(new Event("bouquet-unlock"));
+
+    try {
+      await song.play();
+      musicButton.textContent = "♫ PAUSE DAYLIGHT";
+    } catch {
+      musicButton.textContent = "♫ PLAY DAYLIGHT";
+    }
+  });
+
+  musicButton.addEventListener("click", async () => {
+    if (song.paused) {
+      try {
+        await song.play();
+        musicButton.textContent = "♫ PAUSE DAYLIGHT";
+      } catch {
+        musicButton.textContent = "♫ TRY AGAIN";
+      }
+    } else {
+      song.pause();
+      musicButton.textContent = "♫ PLAY DAYLIGHT";
+    }
+  });
+
+  updateDisplay();
+})();
+</script>
+
+<!-- THREE.JS: animasi dan model buket -->
 <script type="module">
 import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 
 import { GLTFLoader } from
-'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
 
-/* =========================
-   BACKGROUND SCENE
-========================= */
+const container = document.querySelector("#scene");
+const loading = document.querySelector("#loading");
 
 const scene = new THREE.Scene();
-
 scene.background = new THREE.Color("#8ab9e8");
-scene.fog = new THREE.FogExp2("#8ab9e8", 0.018);
+scene.fog = new THREE.FogExp2("#8ab9e8",0.018);
 
 const camera = new THREE.PerspectiveCamera(
-  38,
-  innerWidth / innerHeight,
-  0.1,
-  100
+  38,innerWidth/innerHeight,0.1,100
 );
-
-camera.position.set(0, 0, 10);
+camera.position.set(0,0,10);
 
 const renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  alpha: false
+  antialias:true,
+  alpha:false
 });
-
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.25;
+container.appendChild(renderer.domElement);
 
-document.querySelector("#scene").appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xeaf5ff,0x45638a,2.2));
 
-/* =========================
-   LIGHTING
-========================= */
-
-scene.add(
-  new THREE.HemisphereLight(
-    0xeaf5ff,
-    0x45638a,
-    2.2
-  )
-);
-
-const keyLight = new THREE.DirectionalLight(0xffffff, 3);
-keyLight.position.set(-4, 6, 8);
+const keyLight = new THREE.DirectionalLight(0xffffff,3);
+keyLight.position.set(-4,6,8);
 scene.add(keyLight);
 
-const pinkLight = new THREE.PointLight(0xffb8d2, 35, 25);
-pinkLight.position.set(3, 2, 4);
+const pinkLight = new THREE.PointLight(0xffb8d2,35,25);
+pinkLight.position.set(3,2,4);
 scene.add(pinkLight);
-
-const blueLight = new THREE.PointLight(0x9ccfff, 25, 20);
-blueLight.position.set(-4, -2, 4);
-scene.add(blueLight);
-
-/* =========================
-   SOFT BOKEH
-========================= */
 
 const bokeh = [];
 
-for (let i = 0; i < 100; i++) {
-  const radius = 0.025 + Math.random() * 0.12;
-
+for (let i=0;i<100;i++) {
   const particle = new THREE.Mesh(
-    new THREE.CircleGeometry(radius, 32),
+    new THREE.CircleGeometry(0.025+Math.random()*0.12,24),
     new THREE.MeshBasicMaterial({
-      color: i % 3 === 0 ? "#ffffff" : "#d8eaff",
-      transparent: true,
-      opacity: 0.25 + Math.random() * 0.25,
-      depthWrite: false
+      color:i%3===0 ? "#ffffff" : "#d8eaff",
+      transparent:true,
+      opacity:0.3,
+      depthWrite:false
     })
   );
 
   particle.position.set(
-    (Math.random() - 0.5) * 15,
-    (Math.random() - 0.5) * 10,
-    -2 - Math.random() * 7
+    (Math.random()-0.5)*15,
+    (Math.random()-0.5)*10,
+    -2-Math.random()*7
   );
 
   particle.userData.y = particle.position.y;
-  particle.userData.phase = Math.random() * 10;
-
+  particle.userData.phase = Math.random()*10;
   scene.add(particle);
   bokeh.push(particle);
 }
 
-/* =========================
-   3D PADLOCK
-========================= */
-
+/* Gembok 3D */
 const lockScene = new THREE.Scene();
-
-lockScene.background = null;
-
-const lockCamera = new THREE.PerspectiveCamera(
-  35,
-  1,
-  0.1,
-  20
-);
-
-lockCamera.position.set(0, 0, 5);
+const lockCamera = new THREE.PerspectiveCamera(35,1,0.1,20);
+lockCamera.position.z = 5;
 
 const lockRenderer = new THREE.WebGLRenderer({
-  antialias: true,
-  alpha: true
+  antialias:true,
+  alpha:true
 });
-
-lockRenderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-lockRenderer.setSize(140, 155);
+lockRenderer.setPixelRatio(Math.min(devicePixelRatio,2));
+lockRenderer.setSize(140,130);
 lockRenderer.outputColorSpace = THREE.SRGBColorSpace;
+document.querySelector("#lockCanvas").appendChild(lockRenderer.domElement);
 
-document.querySelector("#lockCanvas").appendChild(
-  lockRenderer.domElement
-);
+lockScene.add(new THREE.HemisphereLight(0xffffff,0x657c9c,2.5));
 
-lockScene.add(new THREE.HemisphereLight(0xffffff, 0x657c9c, 2.5));
-
-const lockLight = new THREE.DirectionalLight(0xffffff, 3);
-lockLight.position.set(-3, 4, 5);
+const lockLight = new THREE.DirectionalLight(0xffffff,3);
+lockLight.position.set(-3,4,5);
 lockScene.add(lockLight);
 
 const lockGroup = new THREE.Group();
 lockScene.add(lockGroup);
 
-const gold = new THREE.MeshStandardMaterial({
-  color: "#d9e3ed",
-  metalness: 0.85,
-  roughness: 0.2
+const metal = new THREE.MeshStandardMaterial({
+  color:"#d9e3ed",metalness:0.85,roughness:0.2
 });
 
 const body = new THREE.Mesh(
-  new THREE.BoxGeometry(1.25, 1.05, 0.35),
+  new THREE.BoxGeometry(1.25,1.05,0.35),
   new THREE.MeshStandardMaterial({
-    color: "#d9e8f7",
-    metalness: 0.3,
-    roughness: 0.25
+    color:"#d9e8f7",metalness:0.3,roughness:0.25
   })
 );
-
-body.position.y = -0.3;
+body.position.y=-0.3;
 lockGroup.add(body);
 
-const shackleCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-0.32, 0.0, 0),
-  new THREE.Vector3(-0.32, 0.42, 0),
-  new THREE.Vector3(-0.25, 0.75, 0),
-  new THREE.Vector3(0, 0.83, 0),
-  new THREE.Vector3(0.25, 0.75, 0),
-  new THREE.Vector3(0.32, 0.42, 0),
-  new THREE.Vector3(0.32, 0.0, 0)
+const curve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-0.32,0,0),
+  new THREE.Vector3(-0.32,0.42,0),
+  new THREE.Vector3(-0.25,0.75,0),
+  new THREE.Vector3(0,0.83,0),
+  new THREE.Vector3(0.25,0.75,0),
+  new THREE.Vector3(0.32,0.42,0),
+  new THREE.Vector3(0.32,0,0)
 ]);
 
-const shackle = new THREE.Mesh(
-  new THREE.TubeGeometry(shackleCurve, 48, 0.07, 12, false),
-  gold
-);
-
-lockGroup.add(shackle);
+lockGroup.add(new THREE.Mesh(
+  new THREE.TubeGeometry(curve,48,0.07,12,false),metal
+));
 
 const hole = new THREE.Mesh(
-  new THREE.CircleGeometry(0.08, 24),
-  new THREE.MeshBasicMaterial({ color: "#49627d" })
+  new THREE.CircleGeometry(0.08,24),
+  new THREE.MeshBasicMaterial({color:"#49627d"})
 );
-
-hole.position.set(0, -0.23, 0.19);
+hole.position.set(0,-0.23,0.19);
 lockGroup.add(hole);
 
-/* =========================
-   REALISTIC FLOWER MODEL
-========================= */
-
-/*
-  Letakkan model buket .glb di:
-  ./flowers.glb
-
-  Model GLB harus berupa buket bunga yang sudah
-  memiliki kelopak, daun, material dan tekstur.
-
-  Kode ini tidak mengubah bentuk model menjadi
-  bunga geometris; ia menampilkan model tersebut.
-*/
-
+/* Model buket realistis */
 const bouquetGroup = new THREE.Group();
 bouquetGroup.visible = false;
 scene.add(bouquetGroup);
 
-const loader = new GLTFLoader();
-
 let flowerLoaded = false;
-
-loader.load(
-  "./flowers.glb",
-
-  function (gltf) {
-    const flowerModel = gltf.scene;
-
-    const box = new THREE.Box3().setFromObject(flowerModel);
-    const size = box.getSize(new THREE.Vector3());
-    const center = box.getCenter(new THREE.Vector3());
-
-    const maxDimension = Math.max(size.x, size.y, size.z);
-
-    if (maxDimension > 0) {
-      const scale = 4.5 / maxDimension;
-      flowerModel.scale.setScalar(scale);
-    }
-
-    flowerModel.position.sub(center.multiplyScalar(
-      flowerModel.scale.x
-    ));
-
-    flowerModel.position.y -= 0.2;
-
-    flowerModel.traverse((obj) => {
-      if (obj.isMesh && obj.material) {
-        obj.castShadow = true;
-        obj.receiveShadow = true;
-
-        if (obj.material.map) {
-          obj.material.map.colorSpace = THREE.SRGBColorSpace;
-        }
-      }
-    });
-
-    bouquetGroup.add(flowerModel);
-
-    flowerLoaded = true;
-    document.querySelector("#loading").classList.remove("show");
-  },
-
-  undefined,
-
-  function (error) {
-    console.error("Model bunga gagal dimuat:", error);
-
-    document.querySelector("#loading").textContent =
-      "Tambahkan file flowers.glb ke repository.";
-    document.querySelector("#loading").classList.add("show");
-  }
-);
-
-/* =========================
-   KEYPAD
-========================= */
-
-let passcode = "";
-
-const display = document.querySelector("#display");
-const message = document.querySelector("#message");
-const lockScreen = document.querySelector("#lockScreen");
-const title = document.querySelector("#title");
-const musicButton = document.querySelector("#music");
-const song = document.querySelector("#song");
-
-function updateDisplay() {
-  display.textContent =
-    passcode.padEnd(4, "-").split("").join(" ");
-}
-
-document.querySelectorAll("[data-number]").forEach(button => {
-  button.addEventListener("click", () => {
-    if (passcode.length < 4) {
-      passcode += button.dataset.number;
-      updateDisplay();
-      message.textContent = "";
-    }
-  });
-});
-
-document.querySelector('[data-action="clear"]').addEventListener(
-  "click",
-  () => {
-    passcode = "";
-    updateDisplay();
-    message.textContent = "";
-  }
-);
-
-document.querySelector('[data-action="delete"]').addEventListener(
-  "click",
-  () => {
-    passcode = passcode.slice(0, -1);
-    updateDisplay();
-  }
-);
-
-/* =========================
-   UNLOCK SEQUENCE
-========================= */
-
 let unlocked = false;
 let openingTime = 0;
 
-document.querySelector("#unlock").addEventListener("click", async () => {
-  if (unlocked) return;
+const loader = new GLTFLoader();
 
-  if (passcode !== "2305") {
-    message.textContent = " ";
-    passcode = "";
-    updateDisplay();
+loader.load(
+  "./flowers.glb",
+  gltf => {
+    const model = gltf.scene;
 
-    lockGroup.rotation.z = 0.12;
-    setTimeout(() => lockGroup.rotation.z = 0, 180);
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const maxDim = Math.max(size.x,size.y,size.z);
 
-    return;
+    if (maxDim > 0) model.scale.setScalar(4.5/maxDim);
+
+    model.position.sub(center.multiplyScalar(model.scale.x));
+    model.position.y -= 0.2;
+
+    model.traverse(obj => {
+      if (!obj.isMesh) return;
+      obj.castShadow = true;
+      obj.receiveShadow = true;
+
+      if (obj.material && obj.material.map) {
+        obj.material.map.colorSpace = THREE.SRGBColorSpace;
+      }
+    });
+
+    bouquetGroup.add(model);
+    flowerLoaded = true;
+
+    if (unlocked) loading.classList.remove("show");
+  },
+  undefined,
+  error => {
+    console.error("Gagal memuat flowers.glb:",error);
+    loading.textContent = "Model flowers.glb belum tersedia.";
+    if (unlocked) loading.classList.add("show");
   }
+);
 
+window.addEventListener("bouquet-unlock",() => {
   unlocked = true;
   openingTime = performance.now();
-
-  lockScreen.classList.add("open");
   bouquetGroup.visible = true;
-
   bouquetGroup.scale.setScalar(0.001);
 
-  title.classList.add("show");
-  musicButton.classList.add("show");
-
-  document.querySelector("#loading").textContent =
-    "A LITTLE MOMENT...";
-  document.querySelector("#loading").classList.add("show");
-
-  /*
-    Audio playback is initiated by the user's
-    button click, but the browser may still
-    require a separate tap on the music button.
-  */
-  try {
-    await song.play();
-    musicButton.textContent = "♫ PAUSE DAYLIGHT";
-  } catch {
-    musicButton.textContent = "♫ PLAY DAYLIGHT";
-  }
+  if (flowerLoaded) loading.classList.remove("show");
 });
 
-/* =========================
-   MUSIC
-========================= */
+let pointerX=0;
+let pointerY=0;
 
-musicButton.addEventListener("click", async () => {
-  if (song.paused) {
-    try {
-      await song.play();
-      musicButton.textContent = "♫ PAUSE DAYLIGHT";
-    } catch {
-      musicButton.textContent = "♫ TRY AGAIN";
-    }
-  } else {
-    song.pause();
-    musicButton.textContent = "♫ PLAY DAYLIGHT";
-  }
+window.addEventListener("pointermove",event => {
+  pointerX=(event.clientX/innerWidth-0.5)*0.35;
+  pointerY=(event.clientY/innerHeight-0.5)*0.25;
 });
 
-/* =========================
-   CAMERA AND RESIZE
-========================= */
-
-let pointerX = 0;
-let pointerY = 0;
-
-window.addEventListener("pointermove", event => {
-  pointerX = (event.clientX / innerWidth - 0.5) * 0.35;
-  pointerY = (event.clientY / innerHeight - 0.5) * 0.25;
-});
-
-window.addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight;
+window.addEventListener("resize",() => {
+  camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
-
-  renderer.setSize(innerWidth, innerHeight);
+  renderer.setSize(innerWidth,innerHeight);
 });
-
-/* =========================
-   ANIMATION
-========================= */
 
 function animate(now) {
   requestAnimationFrame(animate);
+  const t=now*0.001;
 
-  const t = now * 0.001;
-
-  lockGroup.rotation.y = Math.sin(t * 0.7) * 0.12;
-  lockGroup.position.y = Math.sin(t * 1.2) * 0.05;
+  lockGroup.rotation.y=Math.sin(t*0.7)*0.12;
+  lockGroup.position.y=Math.sin(t*1.2)*0.05;
 
   if (unlocked && flowerLoaded) {
-    const progress = Math.min((now - openingTime) / 1600, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
+    const progress=Math.min((now-openingTime)/1600,1);
+    const eased=1-Math.pow(1-progress,3);
 
-    bouquetGroup.scale.setScalar(1.0 * eased);
-    bouquetGroup.rotation.y = Math.sin(t * 0.4) * 0.07;
-    bouquetGroup.position.y = -0.2 + Math.sin(t * 0.9) * 0.06;
+    bouquetGroup.scale.setScalar(eased);
+    bouquetGroup.rotation.y=Math.sin(t*0.4)*0.07;
+    bouquetGroup.rotation.x+=(pointerY*0.15-bouquetGroup.rotation.x)*0.025;
+    bouquetGroup.rotation.z+=(-pointerX*0.15-bouquetGroup.rotation.z)*0.025;
+    bouquetGroup.position.y=-0.2+Math.sin(t*0.9)*0.06;
+    loading.classList.remove("show");
   }
 
-  bouquetGroup.rotation.x +=
-    (pointerY * 0.15 - bouquetGroup.rotation.x) * 0.025;
-
-  bouquetGroup.rotation.z +=
-    (-pointerX * 0.15 - bouquetGroup.rotation.z) * 0.025;
-
   bokeh.forEach(p => {
-    p.position.y = p.userData.y +
-      Math.sin(t * 0.5 + p.userData.phase) * 0.18;
+    p.position.y=p.userData.y+
+      Math.sin(t*0.5+p.userData.phase)*0.18;
 
-    p.material.opacity =
-      0.16 + 0.17 * (
-        0.5 + 0.5 * Math.sin(t + p.userData.phase)
-      );
+    p.material.opacity=0.16+0.17*(
+      0.5+0.5*Math.sin(t+p.userData.phase)
+    );
   });
 
-  lockRenderer.render(lockScene, lockCamera);
-  renderer.render(scene, camera);
+  lockRenderer.render(lockScene,lockCamera);
+  renderer.render(scene,camera);
 }
 
 requestAnimationFrame(animate);
@@ -668,4 +538,3 @@ requestAnimationFrame(animate);
 
 </body>
 </html>
-```
